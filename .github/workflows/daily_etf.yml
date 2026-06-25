@@ -35,6 +35,7 @@ jobs:
         git checkout --orphan gh-pages
         git rm -rf .
         cp -r reports/* . 2>/dev/null || true
+        find . -type d -name '__pycache__' -exec rm -rf {} + 2>/dev/null || true
         git add .
         git commit -m "每日ETF轮动报告 $(date -u +'%Y-%m-%d')"
         git push origin gh-pages --force

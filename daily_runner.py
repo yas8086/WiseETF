@@ -136,6 +136,12 @@ def run_daily(strategy_name='momentum10', etf_pool='core'):
         best_strategy_name=strategy_label,
     )
 
+    # 同时为GitHub Pages生成 index.html
+    import shutil
+    index_path = os.path.join('reports', 'index.html')
+    shutil.copy(report_path, index_path)
+    print(f"  Pages入口: {index_path}")
+
     print(f"\n{'='*60}")
     print(f"  报告已生成: {report_path}")
     print(f"  可在浏览器中打开查看")
