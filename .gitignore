@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# Data
+*.pkl
+*.parquet
+etf_data_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Reports (auto-generated in CI)
+reports/daily_report_*.html

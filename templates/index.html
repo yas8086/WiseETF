@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiseETF - 智能ETF轮动策略平台</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">📈 WiseETF</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/normal?pw=433r">进入系统</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h1 class="mb-4">智能ETF轮动策略平台</h1>
+                <p class="lead mb-4">基于量化分析，寻找最优ETF轮动策略</p>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">核心功能</h5>
+                        <ul class="list-unstyled">
+                            <li>✅ 多种轮动策略回测（动量、均线、双动量）</li>
+                            <li>✅ 近十年历史数据验证</li>
+                            <li>✅ 自动寻找最优策略参数</li>
+                            <li>✅ 实时买卖信号生成</li>
+                            <li>✅ 详细收益分析和风险指标</li>
+                        </ul>
+                    </div>
+                </div>
+                <a href="/normal?pw=433r" class="btn btn-primary btn-lg">进入系统</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

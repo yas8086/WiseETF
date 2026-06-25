@@ -1,0 +1,41 @@
+name: WiseETF每日轮动分析
+
+on:
+  schedule:
+    - cron: '30 7 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  daily-report:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+    
+    - name: 设置Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    
+    - name: 安装依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: 运行每日分析
+      run: |
+        python daily_runner.py
+      
+    - name: 提交报告到gh-pages分支
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git checkout --orphan gh-pages
+        git rm -rf .
+        cp -r reports/* . 2>/dev/null || true
+        git add .
+        git commit -m "每日ETF轮动报告 $(date -u +'%Y-%m-%d')"
+        git push origin gh-pages --force
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

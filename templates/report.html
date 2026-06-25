@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ETF 轮动策略信号</title>
+<style>
+  body{font-family:'PingFang SC','Microsoft YaHei',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f1f5f9;margin:0;padding:16px}
+  .wrap{max-width:680px;width:100%;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+  .card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .year-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:6px 10px}
+  .scroll{overflow-x:auto}
+  details summary{cursor:pointer;font-size:15px;font-weight:700;color:#1e293b;list-style:none;display:flex;align-items:center;gap:6px;padding:10px 14px;background:#f1f5f9;border-radius:8px;margin-bottom:0}
+  details summary::before{content:'▶';font-size:11px;transition:transform .2s;display:inline-block}
+  details[open] summary::before{transform:rotate(90deg)}
+  details>div{margin-top:12px}
+  @media(max-width:480px){
+    .card-grid{grid-template-columns:repeat(2,1fr)}
+    .year-grid{grid-template-columns:repeat(3,1fr)}
+    body{padding:8px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div style="background:linear-gradient(135deg,#1e40af,#3b82f6);padding:24px 28px;color:#fff">
+    <h1 style="margin:0 0 4px;font-size:20px">ETF 轮动策略信号（标准）&nbsp;<span style="font-size:13px;font-weight:normal;opacity:.75">更新时间：{{ update_time }}</span></h1>
+    <p style="margin:0;opacity:.8;font-size:13px">回测区间：{{ backtest_period }} &nbsp;|&nbsp; 数据截至 {{ data_date }}</p>
+  </div>
+  
+  <div style="padding:20px 24px">
+    <!-- 明早开盘模型信号 -->
+    <div style="background:#fef9c3;border:2px solid #fde047;border-radius:10px;padding:16px 20px;margin-bottom:24px">
+      <h2 style="margin:0 0 12px;font-size:15px;color:#854d0e;display:flex;align-items:center;gap:6px">
+        ⚠️ 明早开盘模型信号
+        <span style="font-size:12px;font-weight:normal;opacity:.7">（基于 {{ data_date }} 收盘数据）</span>
+      </h2>
+      
+      {% for signal in signals %}
+      {% if signal.action == 'SELL' %}
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;margin-bottom:8px">
+        <div style="background:#16a34a;color:#fff;font-size:13px;font-weight:bold;padding:4px 10px;border-radius:6px;white-space:nowrap">减少关注</div>
+        <div style="flex:1">
+          <div style="font-weight:bold;font-size:15px;color:#14532d">{{ signal.name }}<span style="font-weight:normal;color:#6b7280;font-size:12px;margin-left:6px">{{ signal.code }}</span></div>
+          <div style="font-size:12px;color:#166534;margin-top:2px">{{ signal.detail }}</div>
+        </div>
+      </div>
+      {% elif signal.action == 'BUY' %}
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#fff7f7;border:1px solid #fca5a5;border-radius:8px;margin-bottom:8px">
+        <div style="background:#dc2626;color:#fff;font-size:13px;font-weight:bold;padding:4px 10px;border-radius:6px;white-space:nowrap">增加关注</div>
+        <div style="flex:1">
+          <div style="font-weight:bold;font-size:15px;color:#7f1d1d">{{ signal.name }}<span style="font-weight:normal;color:#6b7280;font-size:12px;margin-left:6px">{{ signal.code }}</span></div>
+          <div style="font-size:12px;color:#991b1b;margin-top:2px">{{ signal.detail }}</div>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+      
+      <div style="margin-top:12px;font-size:11px;color:#1e293b;font-weight:bold;line-height:1.6">
+        以上为量化模型输出结果，仅供参考，不构成任何投资建议。市场有风险，投资需谨慎，请结合自身情况独立决策。
+      </div>
+    </div>
+
+    <!-- 当前持仓 -->
+    <div style="margin-bottom:24px;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+      <div style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:#f1f5f9;border-bottom:1px solid #e2e8f0">
+        <span style="width:4px;height:18px;background:#3b82f6;border-radius:2px;display:inline-block"></span>
+        <span style="font-size:15px;font-weight:700;color:#1e293b">当前持仓</span>
+      </div>
+      <div style="padding:16px">
+        {% for holding in holdings %}
+        <div style="padding:14px 16px;background:#f0fdf4;border:1px solid #86efac;border-radius:10px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div>
+              <span style="font-weight:700;font-size:16px;color:#1e293b">{{ holding.name }}</span>
+              <span style="color:#94a3b8;font-size:12px;margin-left:8px">{{ holding.code }}</span>
+            </div>
+            <span style="font-size:20px;font-weight:700;color:{% if holding.pnl >= 0 %}#16a34a{% else %}#dc2626{% endif %}">{{ '%+.2f'|format(holding.pnl) }}%</span>
+          </div>
+          <div class="card-grid">
+            <div style="background:rgba(255,255,255,0.7);border-radius:6px;padding:8px 10px">
+              <div style="color:#94a3b8;font-size:11px;margin-bottom:2px">买入价</div>
+              <div style="font-weight:600;color:#1e293b">{{ holding.buy_price }}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.7);border-radius:6px;padding:8px 10px">
+              <div style="color:#94a3b8;font-size:11px;margin-bottom:2px">现价</div>
+              <div style="font-weight:600;color:#1e293b">{{ holding.current_price }}</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.7);border-radius:6px;padding:8px 10px">
+              <div style="color:#94a3b8;font-size:11px;margin-bottom:2px">仓位</div>
+              <div style="font-weight:600;color:#1e293b">{{ holding.position }}%</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.7);border-radius:6px;padding:8px 10px">
+              <div style="color:#94a3b8;font-size:11px;margin-bottom:2px">持有天数</div>
+              <div style="font-weight:600;color:#1e293b">{{ holding.hold_days }} 天</div>
+            </div>
+          </div>
+          <div style="margin-top:8px;font-size:12px;color:#64748b">持仓份数 {{ holding.shares | int }} &nbsp;|&nbsp; 市值 {{ holding.market_value | int }} 元</div>
+        </div>
+        {% endfor %}
+        
+        <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#eff6ff;border-radius:10px">
+          <div style="font-size:13px;color:#1e40af;font-weight:700">账户总资产</div>
+          <div style="font-size:22px;font-weight:800;color:#1e40af">{{ total_value | int }} 元</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 本月收益日历 -->
+    <details style="margin-bottom:20px">
+      <summary>本月收益日历（{{ month_calendar.title }}）</summary>
+      <div style="margin-top:12px">
+        <div style="margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:#64748b">{{ month_calendar.title }}</span>
+          <span style="font-size:14px;font-weight:700;color:{% if month_calendar.total >= 0 %}#dc2626{% else %}#16a34a{% endif %}">月累计 {{ '%+.2f'|format(month_calendar.total) }}%</span>
+        </div>
+        <table style="width:100%;border-collapse:separate;border-spacing:3px">
+          <thead>
+            <tr>
+              {% for day in ['一','二','三','四','五','六','日'] %}
+              <th style="padding:6px 4px;text-align:center;font-size:12px;font-weight:600;color:#94a3b8">{{ day }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for week in month_calendar.weeks %}
+            <tr>
+              {% for day in week %}
+              {% if day.date %}
+              <td style="padding:4px;text-align:center">
+                <div style="border:1px solid #e2e8f0;border-radius:8px;background:{% if day.return is not none and day.return >= 0 %}#fef2f2{% elif day.return is not none %}#f0fdf4{% else %}#f8fafc{% endif %};padding:6px 2px;min-width:36px">
+                  <div style="font-size:11px;color:#64748b;margin-bottom:2px">{{ day.date }}</div>
+                  <div style="font-size:11px;font-weight:normal;color:{% if day.return is not none and day.return >= 0 %}#dc2626{% elif day.return is not none %}#16a34a{% else %}#94a3b8{% endif %}">
+                    {% if day.return is not none %}{{ '%+.1f'|format(day.return) }}{% else %}—{% endif %}
+                  </div>
+                </div>
+              </td>
+              {% else %}
+              <td style="padding:4px"></td>
+              {% endif %}
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <!-- 本年月度收益 -->
+    <details open="">
+      <summary>本年月度收益（{{ year_summary.year }}年）</summary>
+      <div style="margin-top:12px">
+        <div style="margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:#64748b">{{ year_summary.year }}年</span>
+          <span style="font-size:14px;font-weight:700;color:{% if year_summary.total >= 0 %}#dc2626{% else %}#16a34a{% endif %}">年累计 {{ '%+.2f'|format(year_summary.total) }}%</span>
+        </div>
+        <div class="year-grid">
+          {% for month in year_summary.months %}
+          <div style="border:{% if month.is_current %}2px solid #3b82f6{% else %}1px solid #e2e8f0{% endif %};border-radius:10px;background:{% if month.return is not none and month.return >= 0 %}rgb(255,200,200){% elif month.return is not none %}rgb(200,255,200){% else %}#f8fafc{% endif %};padding:12px 8px;text-align:center">
+            <div style="font-size:12px;color:#64748b;margin-bottom:4px">{{ month.name }}月</div>
+            <div style="font-size:14px;font-weight:{% if month.return is not none %}700{% else %}normal{% endif %};color:{% if month.return is not none and month.return >= 0 %}#dc2626{% elif month.return is not none %}#16a34a{% else %}#94a3b8{% endif %}">
+              {% if month.return is not none %}{{ '%+.2f'|format(month.return) }}%{% else %}—{% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </details>
+
+    <!-- 回测总览 -->
+    <details open="">
+      <summary>回测总览（{{ backtest_overview.period }}）</summary>
+      <div style="margin-top:12px">
+        <div class="scroll">
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            <thead>
+              <tr style="background:#f9fafb">
+                <th style="padding:6px 12px;text-align:left">指标</th>
+                <th style="padding:6px 12px;text-align:right">策略</th>
+                <th style="padding:6px 12px;text-align:right;color:#6b7280">{{ backtest_overview.benchmark_name }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in backtest_overview.metrics %}
+              <tr>
+                <td style="padding:6px 12px;border-bottom:1px solid #e5e7eb">{{ item.label }}</td>
+                <td style="padding:6px 12px;border-bottom:1px solid #e5e7eb;text-align:right">
+                  {% if item.strategy_color %}
+                  <span style="color:{{ item.strategy_color }};font-weight:bold">{{ item.strategy_value }}</span>
+                  {% else %}
+                  {{ item.strategy_value }}
+                  {% endif %}
+                </td>
+                <td style="padding:6px 12px;border-bottom:1px solid #e5e7eb;text-align:right;color:#6b7280">
+                  {% if item.benchmark_color %}
+                  <span style="color:{{ item.benchmark_color }};font-weight:bold">{{ item.benchmark_value }}</span>
+                  {% else %}
+                  {{ item.benchmark_value }}
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+
+    <!-- 回测净值曲线 -->
+    <details open="">
+      <summary>回测净值曲线</summary>
+      <div style="margin-top:12px">
+        {% if equity_chart %}
+        <img src="{{ equity_chart }}" style="width:100%;height:auto;border-radius:8px" alt="净值曲线图">
+        {% else %}
+        <p style="text-align:center;color:#94a3b8;padding:40px">暂无图表数据</p>
+        {% endif %}
+      </div>
+    </details>
+
+    <!-- 逐年收益 -->
+    <details open="">
+      <summary>逐年收益</summary>
+      <div style="margin-top:12px">
+        <div class="scroll">
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            <thead>
+              <tr style="background:#f9fafb">
+                <th style="padding:5px 12px;text-align:left">年份</th>
+                <th style="padding:5px 12px;text-align:right">策略</th>
+                <th style="padding:5px 12px;text-align:right;color:#6b7280">{{ yearly_returns.benchmark_name }}</th>
+                <th style="padding:5px 12px;text-align:right">超额</th>
+                <th style="padding:5px 12px;text-align:right">操作次数</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in yearly_returns.data %}
+              <tr>
+                <td style="padding:5px 12px;border-bottom:1px solid #e5e7eb">{{ row.year }}</td>
+                <td style="padding:5px 12px;border-bottom:1px solid #e5e7eb;text-align:right">
+                  <span style="color:{% if row.strategy_return >= 0 %}#dc2626{% else %}#16a34a{% endif %};font-weight:bold">{{ '%+.2f'|format(row.strategy_return) }}%</span>
+                </td>
+                <td style="padding:5px 12px;border-bottom:1px solid #e5e7eb;text-align:right;color:#6b7280">{{ '%+.2f'|format(row.benchmark_return) }}%</td>
+                <td style="padding:5px 12px;border-bottom:1px solid #e5e7eb;text-align:right;color:{% if row.excess >= 0 %}#dc2626{% else %}#16a34a{% endif %}">{{ '%+.2f'|format(row.excess) }}%</td>
+                <td style="padding:5px 12px;border-bottom:1px solid #e5e7eb;text-align:right">{{ row.trades }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+
+    <!-- 滚动持有期平均收益 -->
+    <details open="">
+      <summary>滚动持有期平均收益（任意时点买入）</summary>
+      <div style="margin-top:12px">
+        <div class="scroll">
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            <thead>
+              <tr style="background:#f9fafb">
+                <th style="padding:5px 12px;text-align:center">持有年数</th>
+                <th style="padding:5px 12px;text-align:right">策略平均收益</th>
+                <th style="padding:5px 12px;text-align:right;color:#6b7280">{{ holding_period.benchmark_name }}平均收益</th>
+                <th style="padding:5px 12px;text-align:right">中位数</th>
+                <th style="padding:5px 12px;text-align:right">胜率</th>
+                <th style="padding:5px 12px;text-align:right;color:#6b7280">样本数</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in holding_period.data %}
+              <tr>
+                <td style="padding:5px 12px;border-bottom:1px solid #e5e7eb;text-align:center">{{ row.years }} 年</td>
+                <td style="padding:5px 12px;border-bottom:1px solid #e5e7eb;text-align:right">
+                  <span style="color:{% if row.avg_return >= 0 %}#dc2626{% else %}#16a34a{% endif %};font-weight:bold">{{ '%+.2f'|format(row.avg_return) }}%</span>
+                </td>
+                <td style="padding:5px 12px;border-bottom:1px solid #e5e7eb;text-align:right;color:#6b7280">{{ '%+.2f'|format(row.benchmark_return) }}%</td>
+                <td style="padding:5px 12px;border-bottom:1px solid #e5e7eb;text-align:right">
+                  <span style="color:{% if row.median >= 0 %}#dc2626{% else %}#16a34a{% endif %};font-weight:bold">{{ '%+.2f'|format(row.median) }}%</span>
+                </td>
+                <td style="padding:5px 12px;border-bottom:1px solid #e5e7eb;text-align:right;color:{% if row.win_rate > 50 %}#dc2626{% else %}#16a34a{% endif %};font-weight:bold">{{ '%.1f'|format(row.win_rate) }}%</td>
+                <td style="padding:5px 12px;border-bottom:1px solid #e5e7eb;text-align:right;color:#6b7280">{{ row.samples | int }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+
+  </div>
+</div>
+</body>
+</html>

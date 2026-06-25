@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiseETF Dashboard</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">📈 WiseETF 智能轮动</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link active" href="#" onclick="showTab('backtest')">策略回测</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showTab('optimize')">策略优化</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="showTab('signals')">交易信号</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div id="backtest-tab" class="tab-content">
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">配置参数</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="backtest-form">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label class="form-label">选择ETF（多选）</label>
+                                        <select class="form-select" id="etf-codes" multiple>
+                                            <option value="510300" selected>沪深300ETF</option>
+                                            <option value="510500" selected>中证500ETF</option>
+                                            <option value="159915" selected>创业板ETF</option>
+                                            <option value="510050">上证50ETF</option>
+                                            <option value="159919">沪深300ETF(深)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">策略类型</label>
+                                        <select class="form-select" id="strategy-type">
+                                            <option value="momentum">动量策略</option>
+                                            <option value="ma">均线策略</option>
+                                            <option value="dual_momentum">双动量策略</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">开始日期</label>
+                                        <input type="date" class="form-control" id="start-date" value="2014-01-01">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">结束日期</label>
+                                        <input type="date" class="form-control" id="end-date">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">初始资金</label>
+                                        <input type="number" class="form-control" id="initial-capital" value="100000">
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button type="submit" class="btn btn-primary w-100">运行回测</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-3" id="strategy-params">
+                                    <div class="col-md-6" id="momentum-params">
+                                        <label class="form-label">动量周期 (天)</label>
+                                        <input type="number" class="form-control" id="lookback-period" value="20">
+                                    </div>
+                                    <div class="col-md-6" id="topn-params">
+                                        <label class="form-label">持有数量</label>
+                                        <select class="form-select" id="top-n">
+                                            <option value="1" selected>1只</option>
+                                            <option value="2">2只</option>
+                                            <option value="3">3只</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3" id="results-section" style="display: none;">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">回测结果</h5>
+                            <div>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="updateData()">更新数据</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-4" id="metrics-grid">
+                                <div class="col-md-2">
+                                    <div class="metric-card bg-success text-white">
+                                        <div class="metric-label">总收益率</div>
+                                        <div class="metric-value" id="total-return">--</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="metric-card bg-info text-white">
+                                        <div class="metric-label">年化收益率</div>
+                                        <div class="metric-value" id="annual-return">--</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="metric-card bg-danger text-white">
+                                        <div class="metric-label">最大回撤</div>
+                                        <div class="metric-value" id="max-drawdown">--</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="metric-card bg-warning text-white">
+                                        <div class="metric-label">夏普比率</div>
+                                        <div class="metric-value" id="sharpe-ratio">--</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="metric-card bg-primary text-white">
+                                        <div class="metric-label">胜率</div>
+                                        <div class="metric-value" id="win-rate">--</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="metric-card bg-secondary text-white">
+                                        <div class="metric-label">交易次数</div>
+                                        <div class="metric-value" id="trade-count">--</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <canvas id="equity-chart"></canvas>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6>最近交易信号</h6>
+                                    <div id="recent-signals" class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped">
+                                            <thead><tr><th>日期</th><th>ETF</th><th>操作</th><th>价格</th></tr></thead>
+                                            <tbody id="signals-tbody"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="optimize-tab" class="tab-content" style="display: none;">
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">自动寻找最优策略</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>系统将自动测试多种策略组合，找到历史表现最好的参数配置。</p>
+                            <button class="btn btn-primary" onclick="runOptimization()">开始优化</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row" id="optimize-results" style="display: none;">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">最优策略排名 (Top 10)</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>排名</th>
+                                            <th>策略名称</th>
+                                            <th>年化收益率</th>
+                                            <th>总收益率</th>
+                                            <th>最大回撤</th>
+                                            <th>夏普比率</th>
+                                            <th>胜率</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="optimize-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="signals-tab" class="tab-content" style="display: none;">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">历史交易信号</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>显示所有策略生成的买入卖出信号记录。</p>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>日期</th>
+                                            <th>策略</th>
+                                            <th>ETF代码</th>
+                                            <th>操作</th>
+                                            <th>价格</th>
+                                            <th>原因</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="all-signals-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="loading-modal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status"></div>
+                    <p id="loading-text">正在处理...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
