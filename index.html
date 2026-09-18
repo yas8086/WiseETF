@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETF轮动策略报告 - 2026-06-25</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; 
+               background: #f5f5f5; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #1a1a2e; border-bottom: 3px solid #e94560; padding-bottom: 10px; }
+        h2 { color: #16213e; margin-top: 30px; }
+        .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+        .card .value { font-size: 28px; font-weight: bold; }
+        .card.buy .value { color: #e94560; }
+        .card.sell .value { color: #0f3460; }
+        .card.total .value { color: #16213e; }
+        .card.strategy .value { font-size: 16px; color: #e94560; }
+        table { width: 100%; border-collapse: collapse; background: white; 
+                border-radius: 8px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        th { background: #16213e; color: white; padding: 12px; text-align: left; }
+        td { padding: 10px 12px; border-bottom: 1px solid #eee; }
+        tr:hover { background: #f8f9fa; }
+        .buy-tag { background: #e94560; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .sell-tag { background: #0f3460; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .positive { color: #e94560; font-weight: bold; }
+        .negative { color: #0f3460; font-weight: bold; }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>ETF轮动策略每日报告</h1>
+    <p>报告日期: 2026-06-25</p>
+    
+    <div class="summary">
+        <div class="card buy">
+            <div>买入信号</div>
+            <div class="value">1</div>
+        </div>
+        <div class="card sell">
+            <div>卖出信号</div>
+            <div class="value">0</div>
+        </div>
+        <div class="card total">
+            <div>监控ETF数</div>
+            <div class="value">9</div>
+        </div>
+        <div class="card strategy">
+            <div>当前策略</div>
+            <div class="value">动量(10日) [回测最优]</div>
+        </div>
+    </div>
+    
+    <h2>买入建议</h2>
+    <table>
+        <thead><tr><th>ETF代码</th><th>ETF名称</th><th>当前价</th><th>信号</th><th>原因</th></tr></thead>
+        <tbody><tr>
+                <td>512480</td><td>半导体ETF</td><td>2.756</td>
+                <td><span class="buy-tag">BUY</span></td><td>动量排名前1，10日收益率: 29.39%</td>
+            </tr></tbody>
+    </table>
+    
+    <h2>卖出建议</h2>
+    <table>
+        <thead><tr><th>ETF代码</th><th>ETF名称</th><th>当前价</th><th>信号</th><th>原因</th></tr></thead>
+        <tbody><tr><td colspan="5" style="text-align:center;color:#999;">暂无卖出信号</td></tr></tbody>
+    </table>
+    
+    
+    
+    <h2>ETF池(前50只)</h2>
+    <table>
+        <thead><tr><th>代码</th><th>名称</th><th>分类</th><th>当前价</th></tr></thead>
+        <tbody><tr>
+                <td>588000</td><td>科创50ETF</td><td>宽基</td><td>2.164</td>
+            </tr><tr>
+                <td>510880</td><td>红利ETF</td><td>其他</td><td>3.008</td>
+            </tr><tr>
+                <td>512880</td><td>证券ETF</td><td>行业</td><td>1.110</td>
+            </tr><tr>
+                <td>512010</td><td>医药ETF</td><td>行业</td><td>0.334</td>
+            </tr><tr>
+                <td>515030</td><td>新能源ETF</td><td>行业</td><td>1.904</td>
+            </tr><tr>
+                <td>512480</td><td>半导体ETF</td><td>行业</td><td>2.756</td>
+            </tr><tr>
+                <td>513100</td><td>纳指ETF</td><td>跨境</td><td>2.204</td>
+            </tr><tr>
+                <td>513500</td><td>标普500ETF</td><td>跨境</td><td>2.518</td>
+            </tr><tr>
+                <td>511880</td><td>银华日利</td><td>货币</td><td>100.545</td>
+            </tr></tbody>
+    </table>
+    
+    <div class="footer">
+        <p>WiseETF轮动策略系统 | 数据来源: akshare(东方财富) | 报告生成时间: 2026-06-25 09:53:16</p>
+        <p>本报告仅供学习研究，不构成投资建议。投资有风险，入市需谨慎。</p>
+    </div>
+</div>
+</body>
+</html>
